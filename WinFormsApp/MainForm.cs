@@ -1,6 +1,8 @@
 
 using System.Collections.Generic;
+using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.Json.Serialization.Metadata;
 
 namespace WinFormsApp
 {
@@ -15,12 +17,14 @@ namespace WinFormsApp
             btnFormat.Click += (o, e) => Test_FormatJson();
             btnToDynamic.Click += (o, e) => Test_ToDynamic();
             btnExcludeProperties.Click += (o, e) => Test_ExcludeProperties();
+
+ 
         }
 
         void Test_PascalCase()
         {
             LogClear();
-            List<Model> List = Model.GetList();
+            List<Job> List = Job.GetList();
             string JsonText = NetJson.Serialize(List);
             Log(JsonText);
 
@@ -28,7 +32,7 @@ namespace WinFormsApp
         void Test_CamelCase()
         {
             LogClear();
-            List<Model> List = Model.GetList();
+            List<Job> List = Job.GetList();
             string JsonText = NetJson.Serialize(List, NetJson.CreateOptions(CameCase: true));
             Log(JsonText);
 
@@ -42,7 +46,7 @@ namespace WinFormsApp
 
             NetJson.PopulateObject(P, JsonText);
 
-            Model M1 = new Model();
+            Job M1 = new Job();
             M1.Name = "Model 1";
             M1.Status = Status.Pending;
             M1.Active = true;
@@ -82,7 +86,7 @@ NEW JSON
         }
         void Test_FormatJson()
         {
-            Model M1 = new Model();
+            Job M1 = new Job();
             string JsonText = NetJson.Serialize(M1, NetJson.CreateOptions(CameCase: false, Formatted: false));
 
             string FormattedJsonText = NetJson.Format(JsonText);

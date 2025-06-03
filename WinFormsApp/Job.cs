@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-
-namespace WinFormsApp
+﻿namespace WinFormsApp
 {
 
     //[JsonConverter(typeof(JsonStringEnumConverter))]
@@ -24,17 +17,17 @@ namespace WinFormsApp
         public bool IsCompleted { get; set; } = true;
     }
 
-    public class Model
+    public class Job
     {
-        public Model()
+        public Job()
         {
         }
 
-        static public List<Model> GetList()
+        static public List<Job> GetList()
         {
-            List<Model> Result = new();
+            List<Job> Result = new();
 
-            Model M1 = new Model();
+            Job M1 = new Job();
             M1.Name = "Model 1";
             M1.Status = Status.InProgress;
             M1.Active = true;
@@ -44,14 +37,14 @@ namespace WinFormsApp
             M1.Properties["NiceCar"] = new { Model = "Volvo", Year = 2025 };
 
 
-            Model M2 = new Model();
+            Job M2 = new Job();
             M2.Name = "Model 2";
             M2.Status = Status.AllCompleted;
             M2.Active = true;
             M2.Parts.Add(new Part() { Code = "003", Amount = 5.6M, IsCompleted = false });
             M2.Parts.Add(new Part() { Code = "004", Amount = 7.8M, IsCompleted = true });
 
-            Result.AddRange(new Model[] { M1, M2});
+            Result.AddRange(new Job[] { M1, M2});
 
             return Result;
         }
