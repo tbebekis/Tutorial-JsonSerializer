@@ -1,5 +1,6 @@
 
 using System.Collections.Generic;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization.Metadata;
@@ -17,8 +18,8 @@ namespace WinFormsApp
             btnFormat.Click += (o, e) => Test_FormatJson();
             btnToDynamic.Click += (o, e) => Test_ToDynamic();
             btnExcludeProperties.Click += (o, e) => Test_ExcludeProperties();
+            btnDOM.Click += (o, e) => Test_DOM();
 
- 
         }
 
         void Test_PascalCase()
@@ -33,7 +34,7 @@ namespace WinFormsApp
         {
             LogClear();
             List<Job> List = Job.GetList();
-            string JsonText = NetJson.Serialize(List, NetJson.CreateOptions(CameCase: true));
+            string JsonText = NetJson.Serialize(List, Formatted: true, CameCase: true);  
             Log(JsonText);
 
         }
@@ -42,7 +43,6 @@ namespace WinFormsApp
             Part P = new Part();
             string JsonText = NetJson.Serialize(P);
             P.Amount = 100;
-
 
             NetJson.PopulateObject(P, JsonText);
 
@@ -145,6 +145,13 @@ Exclude Code and IsCompleted properties
 
 ";
             Log(S);
+        }
+        void Test_DOM()
+        {
+            string JsonText = JsonDomDemo.JsonObjectDemo();
+            // https://kevsoft.net/2021/12/29/manipulate-json-with-system-text-json-nodes.html
+
+            Log(JsonText);
         }
 
         void LogClear()

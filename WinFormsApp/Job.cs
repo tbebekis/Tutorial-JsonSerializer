@@ -33,8 +33,8 @@
             M1.Active = true;
             M1.Parts.Add(new Part() { Code = "001", Amount = 1.2M, IsCompleted = true});
             M1.Parts.Add(new Part() { Code = "002", Amount = 3.4M, IsCompleted = false });
-            M1.Properties["John"] = new { Name = "John", Age = 40};
-            M1.Properties["NiceCar"] = new { Model = "Volvo", Year = 2025 };
+            M1.Properties["John"] = "Doe";
+            M1.Properties["NiceCar"] = "Volvo";
 
 
             Job M2 = new Job();
@@ -57,4 +57,5 @@
         public Dictionary<string, object> Properties { get; set; } = new();
         public DateTime DT { get; set; } = DateTime.Now;
     }
+     
 }

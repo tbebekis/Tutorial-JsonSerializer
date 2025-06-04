@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             panel1 = new Panel();
+            btnExcludeProperties = new Button();
             btnToDynamic = new Button();
             btnFormat = new Button();
             btnPopulateObject = new Button();
@@ -36,12 +37,13 @@
             btnPascalCase = new Button();
             btnClear = new Button();
             edtLog = new RichTextBox();
-            btnExcludeProperties = new Button();
+            btnDOM = new Button();
             panel1.SuspendLayout();
             SuspendLayout();
             // 
             // panel1
             // 
+            panel1.Controls.Add(btnDOM);
             panel1.Controls.Add(btnExcludeProperties);
             panel1.Controls.Add(btnToDynamic);
             panel1.Controls.Add(btnFormat);
@@ -54,6 +56,15 @@
             panel1.Name = "panel1";
             panel1.Size = new Size(1004, 63);
             panel1.TabIndex = 0;
+            // 
+            // btnExcludeProperties
+            // 
+            btnExcludeProperties.Location = new Point(726, 17);
+            btnExcludeProperties.Name = "btnExcludeProperties";
+            btnExcludeProperties.Size = new Size(113, 32);
+            btnExcludeProperties.TabIndex = 6;
+            btnExcludeProperties.Text = "Exclude Properties";
+            btnExcludeProperties.UseVisualStyleBackColor = true;
             // 
             // btnToDynamic
             // 
@@ -120,14 +131,14 @@
             edtLog.TabIndex = 1;
             edtLog.Text = "";
             // 
-            // btnExcludeProperties
+            // btnDOM
             // 
-            btnExcludeProperties.Location = new Point(726, 17);
-            btnExcludeProperties.Name = "btnExcludeProperties";
-            btnExcludeProperties.Size = new Size(113, 32);
-            btnExcludeProperties.TabIndex = 6;
-            btnExcludeProperties.Text = "Exclude Properties";
-            btnExcludeProperties.UseVisualStyleBackColor = true;
+            btnDOM.Location = new Point(845, 17);
+            btnDOM.Name = "btnDOM";
+            btnDOM.Size = new Size(113, 32);
+            btnDOM.TabIndex = 7;
+            btnDOM.Text = "DOM";
+            btnDOM.UseVisualStyleBackColor = true;
             // 
             // MainForm
             // 
@@ -155,5 +166,6 @@
         private Button btnFormat;
         private Button btnToDynamic;
         private Button btnExcludeProperties;
+        private Button btnDOM;
     }
 }
