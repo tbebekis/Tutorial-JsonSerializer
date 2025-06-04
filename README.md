@@ -5,9 +5,9 @@ This text explores the use of the [JsonSerializer](https://learn.microsoft.com/e
 .Net types related to serialization are found in the following namespaces
 
 - [System.Text.Json](https://learn.microsoft.com/en-us/dotnet/api/system.text.json). Contains the `JsonSerializer`, the [JsonSerializerOptions](https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsonserializeroptions) and other main types.
-- [System.Text.Json.Serialization](https://learn.microsoft.com/en-us/dotnet/api/system.text.json.serialization). Contains attribute, converters and similar auxiliary classes used in customizing serialization.
+- [System.Text.Json.Serialization](https://learn.microsoft.com/en-us/dotnet/api/system.text.json.serialization). Contains attributes, converters and similar auxiliary classes used in customizing serialization.
 
-There is of course the excellent [Newtonsoft.Json](https://www.newtonsoft.com/json) library but `JsonSerializer` is worth using since it is the native solution provided by .Net and there is no need to install any [NuGet](https://www.nuget.org/) package in order to use it.
+There is of course the excellent [Newtonsoft.Json](https://www.newtonsoft.com/json) library but `JsonSerializer` is worth using it since it is the native solution provided by .Net and there is no need to install any [NuGet](https://www.nuget.org/) package in order to use it.
 
 `JsonSerializer` can be used with .Net Core 3.0 and later and with .Net Standard 2.0.
 
@@ -56,7 +56,7 @@ JsonSerializerOptions JsonOptions = new();
 
 // serialization
 Part P = new(); 
-string JsonText =  JsonSerializer.Serialize(P, JsonOptions);
+string JsonText = JsonSerializer.Serialize(P, JsonOptions);
 
 // de-serialization
 Part P2 = JsonSerializer.Deserialize<Part>(JsonText, JsonOptions);
@@ -142,7 +142,7 @@ public Status Status { get; set; }
 public DateOnly BirthDate { get; set; }
 ```
 
-The `[JsonConverter(typeof(JsonStringEnumConverter))]` can be used also with *enum* types.
+The `[JsonConverter(typeof(JsonStringEnumConverter))]` can be used with *enum* types also.
 
 ```
 [JsonConverter(typeof(JsonStringEnumConverter))]
@@ -160,7 +160,7 @@ Indicates that the property should be ignored in serialization.
 
 ```
 [JsonIgnore]
-public string Password { get; set; }
+public string Secret { get; set; }
 
 [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
 public string Message { get; set; } // ignored when null, the default
@@ -267,9 +267,7 @@ In Asp.Net Core MVC or WebAPI controllers the `ModelState.IsValid` is used to va
 
 ## Customize serialization with Converters
 
-A converter converts an object or a value to and from JSON text. 
-
-More information on converters can be found at .Net Core [docs](https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/converters-how-to).
+A [converter](https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/converters-how-to) converts an object or a value to and from JSON text.  
 
 A custom converter can also be used.
 
@@ -427,9 +425,9 @@ The `JsonSerializer.Deserialize()` methods always create and return a new instan
 But deep in the .Net source code there is a class containing a method that do just that. The [Microsoft.Graph.DerivedTypeConverter](https://learn.microsoft.com/en-us/dotnet/api/microsoft.graph.derivedtypeconverter) contains a **private** method, named [PopulateObject()](https://github.com/microsoftgraph/msgraph-sdk-dotnet-core/blob/57861dc4aea6c33908838915c97fc02105b6e788/src/Microsoft.Graph.Core/Serialization/DerivedTypeConverter.cs#L112-L114) which does exactly what it says.
 
  
-The project that accompanies this text contains a static class under the name `NetJson` which provides, among other useful utilities, a `PopulateObject()` method. This `PopulateObject()` method is just the code from the `Microsoft.Graph.DerivedTypeConverter.PopulateObject()` private method.
-
-`static public void PopulateObject(object Instance, string JsonText, JsonSerializerOptions Options)`
+> The project that accompanies this text contains a static class under the name `NetJson` which provides, among other useful utilities, a `PopulateObject()` method. This `PopulateObject()` method is just the code from the `Microsoft.Graph.DerivedTypeConverter.PopulateObject()` private method.
+>
+> `static public void PopulateObject(object Instance, string JsonText, JsonSerializerOptions Options)`
 
 
 ## The Document Object Model (DOM) of System.Text.Json 
@@ -446,7 +444,7 @@ The system provides two ways in building a DOM model.
 These are mutable classes, meaning the application may add, modify or remove elements in the DOM tree.
 
 - `JsonNode` is an abstract class. Besides that it provides a great number of **static** helper methods for adding elements to the DOM tree. It also serves as the base class for the others in this group.
-- `JsonObject` represents a mutable DOM object. Contains methods such as `Add()`, `Remove()`, `TryGetPropertyValue()`. It also provides the `GetValueKind()` method which returns a value of the [JsonValueKind](https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsonvaluekind) enum.
+- `JsonObject` represents a mutable DOM object.
 - `JsonArray` represents a mutable DOM array object.
 - `JsonValue` represents a mutable DOM value object.
 
@@ -475,14 +473,14 @@ The `JsonObject` and `JsonArray` provide the following methods too
 - `Remove()`
 - `RemoveAt()`
 
-#### Primitive Values using JsonValue.Create(ANY_PRIMITIVE_VALUE)
+#### Primitive Values using JsonValue.Create(AnyPrimitiveValue)
 
 `JsonObject` properties are `Key-Value` pairs, i.e. `JORoot.Add(PropertyName, PropertyValue)`.
 
-The `JsonValue.Create()` is used with primitive Types such as string and integer, in creating new `JsonValue` objects.
+The `JsonValue.Create(AnyPrimitiveValue)` is used with primitive Types such as string and integer, in creating new `JsonValue` objects.
 
 ```
-JsonObject JORoot = new JsonObject();
+JsonObject JORoot = new();
 JORoot.Add("String", JsonValue.Create("This is a JsonValue"));
 JORoot.Add("DateTime", JsonValue.Create(DateTime.Now));
 JORoot.Add("Integer", JsonValue.Create(123));
@@ -495,9 +493,9 @@ Using the `Remove(PropertyName)` removes the property.
 JORoot.Remove("DateTime");
 ```
 
-#### JsonObject Is a Dictionary-like object
+#### JsonObject is a Dictionary-like object
 
-Since `JsonObject` instances are `Dictionary-like` objects, a new `JsonObject` can be initialized as following.
+`JsonObject` instances are `Dictionary-like` objects and a new `JsonObject` can be initialized as following.
 
 ```
 JsonObject JORoot = new JsonObject
@@ -509,10 +507,10 @@ JsonObject JORoot = new JsonObject
 ```
 #### The JsonNode.Parse() method
 
-The `JsonNode.Parse(JsonText)` **static** method parses text and returns `JsonNode` object.
+The `JsonNode.Parse(JsonText)` **static** method parses text and returns a `JsonNode` object.
 
 ```
-JsonObject JORoot = new JsonObject();
+JsonObject JORoot = new();
 JORoot.Add("Person", JsonNode.Parse("""{ "Name": "John Doe", "Age": 30 }"""));
 ```
 #### Using the JsonValue.Create\<T\>() with non-primitive Types
@@ -520,13 +518,13 @@ JORoot.Add("Person", JsonNode.Parse("""{ "Name": "John Doe", "Age": 30 }"""));
 The `JsonValue.Create<T>()` is used with non-primitive Types such as user defined classes, in creating new `JsonValue` objects.
 
 ```
-JsonObject JORoot = new JsonObject();
+JsonObject JORoot = new();
 JORoot.Add("Part", JsonValue.Create<Part>(new Part()));
 ```
 #### Initializing a JsonArray
 
 ```
-JsonObject JORoot = new JsonObject();
+JsonObject JORoot = new();
 JsonArray JOArray = new JsonArray() { 123, true, DateTime.Now, "string value" };
 JORoot.Add("Array", JOArray);
 ```
@@ -542,7 +540,7 @@ This can be done because `JsonObject` provides a suitable constructor.
 `public JsonObject(IEnumerable<KeyValuePair<string, JsonNode?>> properties, JsonNodeOptions? options = null)`
 
 ```
-JsonObject JORoot = new JsonObject();
+JsonObject JORoot = new();
  
 var Dictionary = new Dictionary<string, JsonNode>
 {
@@ -592,7 +590,7 @@ JsonNode PartsNode = RootNode["Parts"];
 JsonNode FirstPartNode = PartsNode[0]; 
 
 // adding new property
-JsonObject ThirdPartNode = new JsonObject();
+JsonObject ThirdPartNode = new();
 ThirdPartNode["Code"] = "003";
 ThirdPartNode["Amount"] = 12.3;
 ThirdPartNode["IsCompleted"] = true;
@@ -623,7 +621,7 @@ string S2 = RootNode["Parts"][0].GetPath();
 
 `JsonDocument` elements are accessed using the `JsonElement` class.
 
-The `JsonElement` class provides array and object enumerators in order to iterate over its elements.
+The `JsonElement` class provides enumerators in order to iterate over its elements.
 
 The `JsonElement` class provides methods such as `GetInt32()` and `TryGetInt32()` which convert JSON text to .Net primitive types.
 
