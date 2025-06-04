@@ -11,6 +11,8 @@ There is of course the excellent [Newtonsoft.Json](https://www.newtonsoft.com/js
 
 `JsonSerializer` can be used with .Net Core 3.0 and later and with .Net Standard 2.0.
 
+> The full text and demo project can be found on [GitHub](https://github.com/tbebekis/Tutorial-JsonSerializer).
+
 ## Basics
 
 The following code entities are used in this text.
