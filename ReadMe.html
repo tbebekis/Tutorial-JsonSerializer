@@ -1,0 +1,506 @@
+<h1 id="serialize-and-deserialize-json-using-jsonserializer">Serialize and deserialize JSON using JsonSerializer</h1>
+<p>This text explores the use of the <a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsonserializer">JsonSerializer</a> .Net class in serializing and deserializing .Net classes to <a href="https://www.json.org/json-en.html">JSON</a>.</p>
+<p>.Net types related to serialization are found in the following namespaces</p>
+<ul>
+    <li><a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.json">System.Text.Json</a>. Contains the <code>JsonSerializer</code>, the <a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsonserializeroptions">JsonSerializerOptions</a> and other main types.</li>
+    <li><a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.json.serialization">System.Text.Json.Serialization</a>. Contains attributes, converters and similar auxiliary classes used in customizing serialization.</li>
+</ul>
+<p>There is of course the excellent <a href="https://www.newtonsoft.com/json">Newtonsoft.Json</a> library but <code>JsonSerializer</code> is worth using it since it is the native solution provided by .Net and there is no need to install any <a href="https://www.nuget.org/">NuGet</a> package in order to use it.</p>
+<p><code>JsonSerializer</code> can be used with .Net Core 3.0 and later and with .Net Standard 2.0.</p>
+<blockquote>
+    <p>The full text and demo project can be found on <a href="https://github.com/tbebekis/Tutorial-JsonSerializer">GitHub</a>.</p>
+</blockquote>
+<h2 id="basics">Basics</h2>
+<p>The following code entities are used in this text.</p>
+<pre><code>public enum Status
+{
+    None,
+    Pending,
+    InProgress,
+    AllCompleted
+}
+
+public class Part
+{
+    public string Code { get; set; }
+    public decimal Amount { get; set; } 
+    public bool IsCompleted { get; set; }
+}
+</code></pre>
+<p><code>JsonSerializer</code> is a <em>static</em> class. No need to create an instance.</p>
+<pre><code>// serialization
+Part P = new(); 
+string JsonText =  JsonSerializer.Serialize(P);
+
+// de-serialization
+Part P2 = JsonSerializer.Deserialize&lt;Part&gt;(JsonText);
+
+// or
+P2 = JsonSerializer.Deserialize(JsonText, typeof(Part)) as Part;
+</code></pre>
+<h2 id="jsonserializeroptions">JsonSerializerOptions</h2>
+<p>The <code>Serialize()</code> and <code>Deserialize()</code> methods accept a <a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsonserializeroptions">JsonSerializerOptions</a> parameter.</p>
+<pre><code>JsonSerializerOptions JsonOptions = new();
+
+// serialization
+Part P = new(); 
+string JsonText = JsonSerializer.Serialize(P, JsonOptions);
+
+// de-serialization
+Part P2 = JsonSerializer.Deserialize&lt;Part&gt;(JsonText, JsonOptions);
+
+// or
+P2 = JsonSerializer.Deserialize(JsonText, typeof(Part), JsonOptions) as Part;
+</code></pre>
+<p>The <code>JsonSerializerOptions</code> controls the behavior of the <code>JsonSerializer</code>. It provides a great number of properties in order to customize the serialization operation.</p>
+<p>Notable properties worth exploring are:</p>
+<ul>
+    <li><a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsonserializeroptions.converters">Converters</a></li>
+    <li><a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsonserializeroptions.defaultignorecondition">DefaultIgnoreCondition</a></li>
+    <li><a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsonserializeroptions.dictionarykeypolicy">DictionaryKeyPolicy</a></li>
+    <li><a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsonserializeroptions.ignorereadonlyproperties">IgnoreReadOnlyProperties</a></li>
+    <li><a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsonserializeroptions.includefields">IncludeFields</a></li>
+    <li><a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsonserializeroptions.numberhandling">NumberHandling</a></li>
+    <li><a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsonserializeroptions.propertynamecaseinsensitive">PropertyNameCaseInsensitive</a></li>
+    <li><a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsonserializeroptions.propertynamingpolicy">PropertyNamingPolicy</a></li>
+    <li><a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsonserializeroptions.readcommenthandling">ReadCommentHandling</a></li>
+    <li><a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsonserializeroptions.referencehandler">ReferenceHandler</a></li>
+    <li><a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsonserializeroptions.typeinforesolver">TypeInfoResolver</a></li>
+    <li><a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsonserializeroptions.web">Web</a></li>
+    <li><a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsonserializeroptions.writeindented">WriteIndented</a></li>
+</ul>
+<p>An example of creating a <code>JsonSerializerOptions</code> instance.</p>
+<pre><code>JsonSerializerOptions Result = new();
+
+Result.PropertyNamingPolicy = null;
+Result.PropertyNameCaseInsensitive = true;
+Result.WriteIndented = true;
+Result.IgnoreReadOnlyProperties = true;
+Result.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;  
+Result.ReadCommentHandling = JsonCommentHandling.Skip;
+Result.AllowTrailingCommas = true;
+Result.NumberHandling = JsonNumberHandling.AllowReadingFromString;
+Result.ReferenceHandler = ReferenceHandler.Preserve;  
+
+return Result;
+</code></pre>
+<h2 id="attributes">Attributes</h2>
+<p>The <a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.json.serialization">System.Text.Json.Serialization</a> namespace provides a great number of attributes that can be used with properties or classes in order to control the serialization.</p>
+<p>Notable attributes worth exploring are:</p>
+<h4 id="jsonconstructor">[JsonConstructor]</h4>
+<p>Indicates a constructor that should be used by the serializer.</p>
+<pre><code>public class Part
+{
+    public Part() 
+    {
+    }
+    [JsonConstructor]
+    public Part(string code) 
+    {
+       Code = code;
+    }
+    public string Code { get; set; }  
+    public decimal Amount { get; set; }  
+    public bool IsCompleted { get; set; } 
+}
+</code></pre>
+<h4 id="jsonconverter">[JsonConverter]</h4>
+<p>Specifies what converter type to be used in serialization.</p>
+<pre><code>[JsonConverter(typeof(JsonStringEnumConverter))]
+public Status Status { get; set; }
+
+[JsonConverter(typeof(DateOnlyConverter))]
+public DateOnly BirthDate { get; set; }
+</code></pre>
+<p>The <code>[JsonConverter(typeof(JsonStringEnumConverter))]</code> can be used with <em>enum</em> types also.</p>
+<pre><code>[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum Status
+{
+    None,
+    Pending,
+    InProgress,
+    AllCompleted
+}
+</code></pre>
+<h4 id="jsonignore">[JsonIgnore]</h4>
+<p>Indicates that the property should be ignored in serialization.</p>
+<pre><code>[JsonIgnore]
+public string Secret { get; set; }
+
+[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+public string Message { get; set; } // ignored when null, the default
+
+[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+public int Value { get; set; } // ignored when 0, the default
+
+[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+public int Value2 { get; set; } =  123; // ignored when 123, the default
+</code></pre>
+<h4 id="jsoninclude">[JsonInclude]</h4>
+<p>Forces serialization of a public field or a public property even when it has just a private setter.</p>
+<pre><code>[JsonInclude]
+public int Age;
+
+[JsonInclude]
+public string ReadOnlyProperty { get; private set; }
+</code></pre>
+<h4 id="jsonnumberhandling">[JsonNumberHandling]</h4>
+<p>Controls how a number is serialized or deserialized by using a <a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.json.serialization.jsonnumberhandling">JsonNumberHandling</a> setting.</p>
+<pre><code>[JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
+public int Amount { get; set; }
+</code></pre>
+<h4 id="jsonpropertyname">[JsonPropertyName]</h4>
+<p>Controls the name under which the property is serialized to or deserialized from.</p>
+<pre><code>[JsonPropertyName(&quot;user_name&quot;)]
+public string UserName { get; set; }
+</code></pre>
+<h4 id="jsonpropertyorder">[JsonPropertyOrder]</h4>
+<p>Controls the serialization order of the property.</p>
+<pre><code>[JsonPropertyOrder(5)]
+public string Name { get; set; }
+</code></pre>
+<h4 id="jsonrequired">[JsonRequired]</h4>
+<p>Dictates that the property must be present.</p>
+<pre><code>[JsonRequired]
+public string Name { get; set; }
+</code></pre>
+<h2 id="attributes-from-other-namespaces">Attributes from other namespaces</h2>
+<blockquote>
+    <p><strong>None of the following attributes</strong> is used in <code>System.Text.Json</code> serialization. </p>
+    <p>Only the attributes found in <code>System.Text.Json.Serialization</code> are taken into account. The <code>System.Text.Json</code> namespace has its own attributes, all with <code>Json</code> as prefix.</p>
+</blockquote>
+<p>Except of the <code>System.Text.Json</code> there are some other namespaces providing validation attributes.</p>
+<ul>
+    <li><code>System.ComponentModel.DataAnnotations</code> namespace. Provides a number of attributes such as <code>[MaxLength]</code>, <code>[Required]</code>, <code>[Range]</code>, etc. Used in <code>Binary Serialization</code> or <code>SOAP Serialization</code>. Also used in Asp.Net Core <code>MVC</code> and <code>WebAPI</code> model validation.</li>
+    <li><code>System.Runtime.Serialization</code> namespace. Provides  attributes such as <code>[DataContract]</code> and <code>[DataMember]</code>. Used by <code>DataContractSerializer</code>.</li>
+    <li><code>System.Xml.Serialization</code> namespace. Provides attributes such as <code>[XmlRoot]</code>, <code>[XmlElement]</code>, <code>[XmlAttribute]</code>. Used in <code>XML Serialization</code>.</li>
+</ul>
+<p>The static <a href="https://learn.microsoft.com/en-us/dotnet/api/system.componentmodel.dataannotations.validator">System.ComponentModel.DataAnnotations.Validator</a> class can be used to manually validate classes annotated with <a href="https://learn.microsoft.com/en-us/dotnet/api/system.componentmodel.dataannotations.validationattribute">ValidationAttribute</a> derived attributes, such as <code>MaxLength</code> and <code>Range</code>.</p>
+<pre><code>MyModel Model = JsonSerializer.Deserialize&lt;MyModel&gt;(JsonText);
+
+List&lt;string&gt; ErrorList = Validate(Model);
+
+...
+
+public List&lt;string&gt; Validate(object Instance)
+{
+    List&lt;string&gt; ErrorList = new();
+    var validationContext = new ValidationContext(Instance);
+    var validationResults = new List&lt;ValidationResult&gt;();
+
+    // not valid?
+    // collect validation errors in a list
+    if (!Validator.TryValidateObject(Instance, validationContext, validationResults, true))
+    {
+        foreach (var validationResult in validationResults)
+        {
+            ErrorList.Add(validationResult.ErrorMessage);
+        }        
+    }
+
+    return ErrorList; // empty list means Instance is valid
+}
+</code></pre>
+<p>In Asp.Net Core MVC or WebAPI controllers the <code>ModelState.IsValid</code> is used to validate attributes based on <code>System.ComponentModel.DataAnnotations</code> namespace annotations.</p>
+<h2 id="customize-serialization-with-converters">Customize serialization with Converters</h2>
+<p>A <a href="https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/converters-how-to">converter</a> converts an object or a value to and from JSON text.  </p>
+<p>A custom converter can also be used.</p>
+<pre><code>[JsonConverter(typeof(CustomDateOnlyConverter))]
+public DateOnly BirthDate { get; set; }
+
+...
+
+public class CustomDateOnlyConverter : JsonConverter&lt;DateOnly&gt;
+{
+    public override DateOnly Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        return DateOnly.Parse(reader.GetString());
+    }
+
+    public override void Write(Utf8JsonWriter writer, DateOnly value, JsonSerializerOptions options)
+    {
+        writer.WriteStringValue(value.ToString(&quot;yyyy-MM-dd&quot;));
+    }
+}
+</code></pre>
+<p>There are two patterns in creating a custom converter</p>
+<ul>
+    <li><a href="https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/converters-how-to#sample-basic-converter">Basic pattern</a>. The custom converter derives from <a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.json.serialization.jsonconverter-1"><code>JsonConverter&lt;TValue&gt;</code></a> class.</li>
+    <li><a href="https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/converters-how-to#sample-factory-pattern-converter">Factory pattern</a>. The custom converter derives from <a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.json.serialization.jsonconverterfactory">JsonConverterFactory</a> class.</li>
+</ul>
+<p>A custom converter can be registered</p>
+<ul>
+    <li>by adding an instance of the custom converter to <a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsonserializeroptions.converters">JsonSerializerOptions.Converters</a> collection</li>
+    <li>by applying the <code>[JsonConverter]</code> to a class that represents a custom value type</li>
+    <li>by applying the <code>[JsonConverter]</code> to properties that require the custom converter.</li>
+</ul>
+<p>When there are multiple converters applied then there are <a href="https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/converters-how-to#converter-registration-precedence">rules that dictate the order</a> by which a converter is chosen in serialization.</p>
+<h2 id="customize-serialization-with-a-resolver-and-modifier-functions">Customize serialization with a Resolver and Modifier functions</h2>
+<p>The <a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsonserializeroptions.typeinforesolver">JsonSerializerOptions.TypeInfoResolver</a> property provides a way to plug <code>modifier</code> functions of the type <code>Action&lt;JsonTypeInfo&gt;</code> into serialization.</p>
+<p>Inline modifiers with lambda functions.</p>
+<pre><code>JsonSerializerOptions JsonOptions = new()
+{
+    TypeInfoResolver = new DefaultJsonTypeInfoResolver
+    {
+        Modifiers =
+        {
+            (TypeInfo) =&gt; {
+                //...
+            },
+            (TypeInfo) =&gt; {
+                //...
+            }
+        }
+    }
+};
+</code></pre>
+<p>Or usual methods in a class.</p>
+<pre><code>static public class Helper
+{
+    static public void ModifierFunc1(JsonTypeInfo TypeInfo)
+    {
+        //...
+    }
+    static public void ModifierFunc2(JsonTypeInfo TypeInfo)
+    {
+        //...
+    }
+}
+
+JsonSerializerOptions JsonOptions = new();
+Json.Options.Modifiers.Add(Helper.ModifierFunc1);
+Json.Options.Modifiers.Add(Helper.ModifierFunc2);
+</code></pre>
+<p>Here is a custom resolver that excludes a list of specified properties from serialization.</p>
+<pre><code>public class ExcludePropertiesTypeInfoResolver : DefaultJsonTypeInfoResolver
+{
+    string[] ExcludeProperties = new string[0];
+
+    static void RemoveAll&lt;T&gt;(IList&lt;T&gt; list, Predicate&lt;T&gt; predicate)
+    {
+        for (int i = 0; i &lt; list.Count; i++)
+        {
+            if (predicate(list[i]))
+            {
+                list.RemoveAt(i--);
+            }
+        }
+    }
+    void ModifierFunc(JsonTypeInfo TypeInfo)
+    {
+        if (TypeInfo.Kind != JsonTypeInfoKind.Object)
+            return;
+
+        RemoveAll(TypeInfo.Properties, prop =&gt; ExcludeProperties.Contains(prop.Name)); 
+    }
+ 
+    public ExcludePropertiesTypeInfoResolver(string[] ExcludeProperties)
+    {
+        this.ExcludeProperties = ExcludeProperties;
+        this.Modifiers.Insert(0, ModifierFunc);
+    }
+}
+</code></pre>
+<p>And here is how to use it.</p>
+<pre><code>var ExcludeProperties = new[] { &quot;Prop1&quot;, &quot;Prop2&quot;};
+
+JsonSerializerOptions JsonOptions = new()
+{
+    TypeInfoResolver = new ExcludePropertiesTypeInfoResolver(ExcludeProperties)
+}; 
+</code></pre>
+<p>The <a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.json.serialization.metadata.jsontypeinfo">JsonTypeInfo</a> provides metadata about the type being serialized.</p>
+<p>Regarding modifier functions .Net Core docs provide a number of <a href="https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/custom-contracts#modifiers">examples</a>.</p>
+<h2 id="property-name-casing">Property Name Casing</h2>
+<p>The casing of a property name, such as camel-casing, is controlled by the <a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsonserializeroptions.propertynamingpolicy">JsonSerializerOptions.PropertyNamingPolicy</a>.</p>
+<p><code>PropertyNamingPolicy</code> property is a <a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsonnamingpolicy">JsonNamingPolicy</a> derived class. When it is <strong>null</strong>, the default, property names remain unchanged.</p>
+<p>That <code>JsonNamingPolicy</code> class provides a number of static properties that return a <code>JsonNamingPolicy</code> derived class instance, such as <a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsonnamingpolicy.camelcase">CamelCase</a> or <a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsonnamingpolicy.snakecaselower">SnakeCaseLower</a>. Each one for a specific casing.</p>
+<pre><code>JsonSerializerOptions JsonOptions = new();
+
+JsonOptions.PropertyNamingPolicy = JsonNamingPolicy.CameCase; 
+</code></pre>
+<h2 id="the-populateobject-problem">The PopulateObject() problem.</h2>
+<p><code>System.Text.Json</code> provides a solution under the title <a href="https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/populate-properties">Populate initialized properties</a> which is far from what is actully needed.</p>
+<p>Frequently there are cases where there is an already constructed instance that needs to be populated using data coming as json text. This is a problem that the <code>System.Text.Json</code> has no solution to offer yet.</p>
+<p>The <code>JsonSerializer.Deserialize()</code> methods always create and return a new instance. This is not always what an application needs. </p>
+<p>But deep in the .Net source code there is a class containing a method that do just that. The <a href="https://learn.microsoft.com/en-us/dotnet/api/microsoft.graph.derivedtypeconverter">Microsoft.Graph.DerivedTypeConverter</a> contains a <strong>private</strong> method, named <a href="https://github.com/microsoftgraph/msgraph-sdk-dotnet-core/blob/57861dc4aea6c33908838915c97fc02105b6e788/src/Microsoft.Graph.Core/Serialization/DerivedTypeConverter.cs#L112-L114">PopulateObject()</a> which does exactly what it says.</p>
+<blockquote>
+    <p>The project that accompanies this text contains a static class under the name <code>NetJson</code> which provides, among other useful utilities, a <code>PopulateObject()</code> method. This <code>PopulateObject()</code> method is just the code from the <code>Microsoft.Graph.DerivedTypeConverter.PopulateObject()</code> private method.</p>
+    <p><code>static public void PopulateObject(object Instance, string JsonText, JsonSerializerOptions Options)</code></p>
+</blockquote>
+<h2 id="the-document-object-model-dom-of-systemtextjson">The Document Object Model (DOM) of System.Text.Json</h2>
+<p>Except of the <code>JsonSerializer</code> the .Net Core serialization sub-system provides a <a href="https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/use-dom">DOM model</a> too.</p>
+<p>The system provides two ways in building a DOM model.</p>
+<ul>
+    <li><a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.json.nodes.jsonobject">System.Text.Json.JsonObject</a> class, along with <a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.json.nodes.jsonnode">JsonNode</a>, <a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.json.nodes.jsonarray">JsonArray</a> and <a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.json.nodes.jsonvalue">JsonValue</a> classes</li>
+    <li><a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsondocument">System.Text.Json.JsonDocument</a> along with <a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsonelement">JsonElement</a> class.</li>
+</ul>
+<h2 id="jsonobject-jsonnode-jsonarray-and-jsonvalue">JsonObject, JsonNode, JsonArray and JsonValue</h2>
+<p>These are mutable classes, meaning the application may add, modify or remove elements in the DOM tree.</p>
+<ul>
+    <li><code>JsonNode</code> is an abstract class. Besides that it provides a great number of <strong>static</strong> helper methods for adding elements to the DOM tree. It also serves as the base class for the others in this group.</li>
+    <li><code>JsonObject</code> represents a mutable DOM object.</li>
+    <li><code>JsonArray</code> represents a mutable DOM array object.</li>
+    <li><code>JsonValue</code> represents a mutable DOM value object.</li>
+</ul>
+<p>All the above provide the following properties </p>
+<ul>
+    <li>an integer indexer property <code>Item[Int32]</code></li>
+    <li>a string indexer property <code>Item[String]</code></li>
+    <li>a <code>Count</code> property</li>
+</ul>
+<p>All the above provide the following methods </p>
+<ul>
+    <li><code>AsObject()</code> </li>
+    <li><code>AsArray()</code>  </li>
+    <li><code>AsValue()</code>  </li>
+    <li><code>GetPath()</code></li>
+    <li><code>GetPropertyName()</code></li>
+    <li><code>GetType()</code></li>
+    <li><code>GetValue&lt;T&gt;()</code></li>
+    <li><code>GetValueKind()</code> which returns a value of the <a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsonvaluekind">JsonValueKind</a> enum</li>
+    <li><code>ReplaceWith&lt;T&gt;(T)</code></li>
+    <li><code>ToJsonString()</code></li>
+</ul>
+<p>The <code>JsonObject</code> and <code>JsonArray</code> provide the following methods too</p>
+<ul>
+    <li><code>Add()</code></li>
+    <li><code>Clear()</code></li>
+    <li><code>Remove()</code></li>
+    <li><code>RemoveAt()</code></li>
+</ul>
+<h4 id="primitive-values-using-jsonvaluecreateanyprimitivevalue">Primitive Values using JsonValue.Create(AnyPrimitiveValue)</h4>
+<p><code>JsonObject</code> properties are <code>Key-Value</code> pairs, i.e. <code>JORoot.Add(PropertyName, PropertyValue)</code>.</p>
+<p>The <code>JsonValue.Create(AnyPrimitiveValue)</code> is used with primitive Types such as string and integer, in creating new <code>JsonValue</code> objects.</p>
+<pre><code>JsonObject JORoot = new();
+JORoot.Add(&quot;String&quot;, JsonValue.Create(&quot;This is a JsonValue&quot;));
+JORoot.Add(&quot;DateTime&quot;, JsonValue.Create(DateTime.Now));
+JORoot.Add(&quot;Integer&quot;, JsonValue.Create(123));
+</code></pre>
+<h4 id="removing-a-property">Removing a Property</h4>
+<p>Using the <code>Remove(PropertyName)</code> removes the property.</p>
+<pre><code>JORoot.Remove(&quot;DateTime&quot;);
+</code></pre>
+<h4 id="jsonobject-is-a-dictionary-like-object">JsonObject is a Dictionary-like object</h4>
+<p><code>JsonObject</code> instances are <code>Dictionary-like</code> objects and a new <code>JsonObject</code> can be initialized as following.</p>
+<pre><code>JsonObject JORoot = new JsonObject
+{
+    [&quot;Key1&quot;] = &quot;This is a string&quot;,
+    [&quot;Key2&quot;] = DateTime.Now,
+    [&quot;Key3&quot;] = false,
+};
+</code></pre>
+<h4 id="the-jsonnodeparse-method">The JsonNode.Parse() method</h4>
+<p>The <code>JsonNode.Parse(JsonText)</code> <strong>static</strong> method parses text and returns a <code>JsonNode</code> object.</p>
+<pre><code>JsonObject JORoot = new();
+JORoot.Add(&quot;Person&quot;, JsonNode.Parse(&quot;&quot;&quot;{ &quot;Name&quot;: &quot;John Doe&quot;, &quot;Age&quot;: 30 }&quot;&quot;&quot;));
+</code></pre>
+<h4 id="using-the-jsonvaluecreatet-with-non-primitive-types">Using the JsonValue.Create&lt;T&gt;() with non-primitive Types</h4>
+<p>The <code>JsonValue.Create&lt;T&gt;()</code> is used with non-primitive Types such as user defined classes, in creating new <code>JsonValue</code> objects.</p>
+<pre><code>JsonObject JORoot = new();
+JORoot.Add(&quot;Part&quot;, JsonValue.Create&lt;Part&gt;(new Part()));
+</code></pre>
+<h4 id="initializing-a-jsonarray">Initializing a JsonArray</h4>
+<pre><code>JsonObject JORoot = new();
+JsonArray JOArray = new JsonArray() { 123, true, DateTime.Now, &quot;string value&quot; };
+JORoot.Add(&quot;Array&quot;, JOArray);
+</code></pre>
+<h4 id="using-a-dictionarystring-jsonnode">Using a Dictionary&lt;string, JsonNode&gt;</h4>
+<p>A <code>Dictionary&lt;string, JsonNode&gt;</code> can be used in adding a property to a <code>JsonObject</code> object.</p>
+<p>The <code>Dictionary&lt;string, JsonNode&gt;</code> dictionary has to be converted to a <code>JsonObject</code> first.</p>
+<p>This can be done because <code>JsonObject</code> provides a suitable constructor.</p>
+<p><code>public JsonObject(IEnumerable&lt;KeyValuePair&lt;string, JsonNode?&gt;&gt; properties, JsonNodeOptions? options = null)</code></p>
+<pre><code>JsonObject JORoot = new();
+ 
+var Dictionary = new Dictionary&lt;string, JsonNode&gt;
+{
+    [&quot;Key1&quot;] = &quot;This is a string&quot;,
+    [&quot;Key2&quot;] = DateTime.Now,
+    [&quot;Key3&quot;] = false,
+    [&quot;Key4&quot;] = JsonValue.Create&lt;Status&gt;(Status.InProgress),
+};
+
+JsonObject DicNode = new JsonObject(Dictionary);
+JORoot.Add(&quot;Dictionary&quot;, DicNode);
+</code></pre>
+<h4 id="accessing-properties-and-values">Accessing Properties and Values</h4>
+<pre><code>string DemoJsonText = &quot;&quot;&quot;
+        {
+            &quot;Id&quot;: 1,
+            &quot;Name&quot;: &quot;Model 1&quot;,
+            &quot;Status&quot;: &quot;InProgress&quot;,
+            &quot;Active&quot;: true,
+            &quot;Parts&quot;: [
+                {
+                &quot;Code&quot;: &quot;001&quot;,
+                &quot;Amount&quot;: 1.2,
+                &quot;IsCompleted&quot;: true
+                },
+                {
+                &quot;Code&quot;: &quot;002&quot;,
+                &quot;Amount&quot;: 3.4,
+                &quot;IsCompleted&quot;: false
+                }
+            ],
+            &quot;Properties&quot;: {
+            &quot;John&quot;: &quot;Doe&quot;,
+            &quot;NiceCar&quot;: &quot;Volvo&quot;
+            },
+            &quot;DT&quot;: &quot;2025-06-04T00:59:25.6948527+03:00&quot;
+        }
+        &quot;&quot;&quot;;
+
+JsonNode RootNode = JsonNode.Parse(DemoJsonText);
+
+// accessing array
+JsonNode PartsNode = RootNode[&quot;Parts&quot;];
+JsonNode FirstPartNode = PartsNode[0]; 
+
+// adding new property
+JsonObject ThirdPartNode = new();
+ThirdPartNode[&quot;Code&quot;] = &quot;003&quot;;
+ThirdPartNode[&quot;Amount&quot;] = 12.3;
+ThirdPartNode[&quot;IsCompleted&quot;] = true;
+
+// get node as array
+JsonArray ArrayNode = PartsNode.AsArray();
+ArrayNode.Add(ThirdPartNode);
+
+// typecasting nodes
+JsonNode PropNode = ThirdPartNode[&quot;Amount&quot;];
+double V = (double)PropNode;
+// 12.3
+
+string S = (string)ThirdPartNode[&quot;Code&quot;];
+// 003
+
+// using the GetValue&lt;T&gt;()
+DateTime DateTimeNode = RootNode[&quot;DT&quot;].GetValue&lt;DateTime&gt;();
+
+// get the path
+string S2 = RootNode[&quot;Parts&quot;][0].GetPath();
+// $.Parts[0]   where $ denotes the root node
+</code></pre>
+<h2 id="jsondocument">JsonDocument</h2>
+<p><code>JsonDocument</code> is used in building a <strong>read-only</strong> DOM. It provides the <code>RootElement</code> of type <code>JsonElement</code>.</p>
+<p><code>JsonDocument</code> elements are accessed using the <code>JsonElement</code> class.</p>
+<p>The <code>JsonElement</code> class provides enumerators in order to iterate over its elements.</p>
+<p>The <code>JsonElement</code> class provides methods such as <code>GetInt32()</code> and <code>TryGetInt32()</code> which convert JSON text to .Net primitive types.</p>
+<blockquote>
+    <p><strong>NOTE</strong>: <code>JsonElement</code> is an <code>IDisposable</code> type.</p>
+</blockquote>
+<pre><code>double Total = 0;
+
+using (JsonDocument Doc = JsonDocument.Parse(DemoJsonText))
+{
+    JsonElement Root = Doc.RootElement;
+    JsonElement PartsProperty = Root.GetProperty(&quot;Parts&quot;);
+    foreach (JsonElement PartProperty in PartsProperty.EnumerateArray())
+    {
+        if (PartProperty.TryGetProperty(&quot;Amount&quot;, out JsonElement AmountElement))
+        {
+            Total += AmountElement.GetDouble();
+        }
+    }
+}
+</code></pre>

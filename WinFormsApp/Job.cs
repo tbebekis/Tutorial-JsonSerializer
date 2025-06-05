@@ -1,4 +1,6 @@
-﻿namespace WinFormsApp
+﻿
+
+namespace WinFormsApp
 {
 
     //[JsonConverter(typeof(JsonStringEnumConverter))]
@@ -12,6 +14,7 @@
 
     public class Part
     {
+ 
         public string Code { get; set; } = "123";
         public decimal Amount { get; set; } = 12.34M;
         public bool IsCompleted { get; set; } = true;

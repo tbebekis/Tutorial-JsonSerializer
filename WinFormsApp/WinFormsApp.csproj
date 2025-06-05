@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="..\ReadMe.html" Link="ReadMe.html" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="..\README.md" Link="README.md" />
   </ItemGroup>
 
